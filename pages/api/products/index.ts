@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getOffsetLimit, getLista } from "lib/request";
+import { getOffsetLimit } from "lib/request";
 import { productsIndex } from "lib/algolia";
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {

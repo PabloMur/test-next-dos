@@ -1,5 +1,5 @@
 import { firestore } from "lib/firebaseConn";
-
+import isAfter from "date-fns/isAfter";
 const collection = firestore.collection("auth");
 export class Auth {
   ref: FirebaseFirestore.DocumentReference;
@@ -17,8 +17,19 @@ export class Auth {
     await this.ref.update(this.data);
   }
 
-  static async findByEmail(email: string) {
+  isCodeExpired() {
+    const now = new Date();
+    const expires = this.data.expires.toDate();
+    return isAfter(now, expires);
+  }
+
+  static cleanEmail(email: string) {
     const cleanEmail = email.trim().toLowerCase();
+    return cleanEmail;
+  }
+
+  static async findByEmail(email: string) {
+    const cleanEmail = Auth.cleanEmail(email);
     const results = await collection.where("email", "==", cleanEmail).get();
     if (results.docs.length) {
       const first = results.docs[0];
@@ -34,5 +45,22 @@ export class Auth {
     const newAuth = new Auth(newAuthSnap.id);
     newAuth.data = data;
     return newAuth;
+  }
+  static async findByEmailAndCode(email: string, code: any) {
+    const cleanEmail = Auth.cleanEmail(email);
+    const auth = await collection
+      .where("email", "==", cleanEmail)
+      .where("code", "==", code)
+      .get();
+    if (auth.empty) {
+      console.error("email o codigo incorrecto");
+      return null;
+    } else {
+      const doc = auth.docs[0];
+      const newAuth = new Auth(doc.id);
+      newAuth.data = doc.data();
+      await newAuth.push();
+      return newAuth;
+    }
   }
 }

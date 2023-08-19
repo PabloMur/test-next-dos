@@ -28,12 +28,11 @@ export async function sendCode(email: string) {
   const cleanEmail = email.trim().toLowerCase();
   const auth = await findOrCreateAuth(cleanEmail);
   const code = random.intBetween(10000, 99999);
-  console.log(code);
-
   const now = new Date();
   const expires = addMinutos(now, 20);
   auth.data.code = code;
   auth.data.expires = expires;
   await auth.push();
-  return auth;
+  console.log("email enviado a " + email + " con codigo: " + code);
+  return true;
 }

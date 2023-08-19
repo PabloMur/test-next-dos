@@ -10,7 +10,7 @@ export class User {
   }
   async pull() {
     const snap = await this.ref.get();
-    this.data = snap.data;
+    this.data = snap.data();
   }
   async push() {
     await this.ref.update(this.data);
